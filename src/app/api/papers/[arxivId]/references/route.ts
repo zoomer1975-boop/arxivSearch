@@ -26,34 +26,27 @@ export async function GET(
 
   const rawRefs = extractReferences(cached.htmlContent)
 
-  // Verify arXiv IDs in small batches (rate limited)
-  const enriched: Reference[] = await Promise.all(
-    rawRefs.map(async (ref): Promise<Reference> => {
-      if (!ref.arxivId) {
-        return {
-          text: ref.text,
-          doi: ref.doi,
-        }
-      }
-      try {
-        const paper = await fetchArxivById(ref.arxivId)
-        return {
-          text: ref.text,
-          arxivId: ref.arxivId,
-          doi: ref.doi,
-          arxivUrl: paper ? `/paper/${ref.arxivId}` : undefined,
-          verified: !!paper,
-        }
-      } catch {
-        return {
-          text: ref.text,
-          arxivId: ref.arxivId,
-          doi: ref.doi,
-          verified: false,
-        }
-      }
-    })
-  )
+  // Verify arXiv IDs sequentially to respect rate limits (throttle is handled in fetchArxivById)
+  const enriched: Reference[] = []
+  for (const ref of rawRefs) {
+    if (!ref.arxivId) {
+      enriched.push({ text: ref.text, doi: ref.doi })
+      continue
+    }
+    try {
+      const paper = await fetchArxivById(ref.arxivId)
+      enriched.push({
+        text: ref.text,
+        arxivId: ref.arxivId,
+        doi: ref.doi,
+        arxivUrl: paper ? `/paper/${ref.arxivId}` : undefined,
+        verified: !!paper,
+      })
+    } catch {
+      enriched.push({ text: ref.text, arxivId: ref.arxivId, doi: ref.doi, verified: false })
+    }
+    // throttle is handled in fetchArxivById via fetchArxivXml
+  }
 
   await prisma.paperCache.update({
     where: { arxivId },

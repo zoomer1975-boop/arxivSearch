@@ -2,10 +2,9 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { QueryProvider } from '@/components/query-provider'
-import { initCron } from '@/lib/cron-init'
 
-// Initialize cron at module level so it runs once on server startup
-initCron()
+// Cron jobs are triggered externally via POST /api/cron/check-papers with x-cron-secret header
+// See src/lib/cron.ts for the job logic
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

@@ -1,3 +1,8 @@
+/**
+ * In-process cron scheduler for single-process deployments.
+ * For multi-process/serverless deployments, use an external scheduler
+ * to POST to /api/cron/check-papers with x-cron-secret header instead.
+ */
 import cron from 'node-cron'
 
 let initialized = false

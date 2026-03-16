@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { translateToKorean } from '@/lib/claude-api'
+import { auth } from '@/lib/auth'
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ arxivId: string }> }
 ) {
+  const session = await auth()
+  if (!session || session.user.status !== 'APPROVED') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { arxivId } = await params
 
   const cached = await prisma.paperCache.findUnique({ where: { arxivId } })

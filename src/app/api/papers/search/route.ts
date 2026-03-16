@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { searchArxiv } from '@/lib/arxiv-api'
+import { auth } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
+  const session = await auth()
+  if (!session || session.user.status !== 'APPROVED') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { searchParams } = req.nextUrl
   const q = searchParams.get('q') ?? ''
   const cat = searchParams.get('cat') ?? ''

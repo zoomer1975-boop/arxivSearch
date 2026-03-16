@@ -12,7 +12,10 @@ const adapter = new PrismaPg({ connectionString })
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
-  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? 'Admin@1234'
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD
+  if (!adminPassword) {
+    throw new Error('ADMIN_SEED_PASSWORD environment variable is required')
+  }
   const hashedPassword = await bcrypt.hash(adminPassword, 12)
 
   const admin = await prisma.user.upsert({

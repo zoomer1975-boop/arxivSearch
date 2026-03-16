@@ -18,6 +18,7 @@ export function sanitizeHtml(html: string): string {
     ALLOWED_ATTR,
     ALLOW_DATA_ATTR: false,
     FORCE_BODY: true,
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
   })
 }
 

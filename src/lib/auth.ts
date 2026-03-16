@@ -3,7 +3,7 @@ import Credentials from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import type { Role, Status } from '@/generated/prisma/enums'
+import { authConfig } from '@/lib/auth-config'
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -11,6 +11,7 @@ const loginSchema = z.object({
 })
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -29,30 +30,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role as Role,
-          status: user.status as Status,
+          role: user.role,
+          status: user.status,
         }
       },
     }),
   ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.id = user.id as string
-        token.role = (user as { role: Role }).role
-        token.status = (user as { status: Status }).status
-      }
-      return token
-    },
-    session({ session, token }) {
-      session.user.id = token.id as string
-      session.user.role = token.role as Role
-      session.user.status = token.status as Status
-      return session
-    },
-  },
-  pages: {
-    signIn: '/login',
-  },
-  session: { strategy: 'jwt' },
 })
