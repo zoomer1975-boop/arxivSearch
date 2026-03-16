@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AlertMethod {
+  EMAIL
+  TELEGRAM
+  BOTH
+}
+
+model User {
+  id             String      @id @default(cuid())
+  name           String
+  email          String      @unique
+  password       String
+  institution    String?
+  role           Role        @default(USER)
+  status         Status      @default(PENDING)
+  telegramChatId String?
+  alertMethod    AlertMethod @default(EMAIL)
+  alertTime      String      @default("09:00")
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  keywords      UserKeyword[]
+  categories    UserCategory[]
+  watchedPapers WatchedPaper[]
+}
+
+model UserCategory {
+  id       String @id @default(cuid())
+  userId   String
+  category String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+}
+
+model UserKeyword {
+  id      String @id @default(cuid())
+  userId  String
+  keyword String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, keyword])
+}
+
+model WatchedPaper {
+  id              String   @id @default(cuid())
+  userId          String
+  arxivId         String
+  title           String
+  matchedKeywords String
+  matchedCategory String
+  isRead          Boolean  @default(false)
+  notifiedAt      DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, arxivId])
+  @@index([userId, isRead])
+}
+
+model PaperCache {
+  id                 String   @id @default(cuid())
+  arxivId            String   @unique
+  title              String
+  authors            String
+  abstract           String   @db.Text
+  htmlContent        String?  @db.Text
+  summary            String?  @db.Text
+  summaryKo          String?  @db.Text
+  translatedSections String?  @db.Text
+  references         String?  @db.Text
+  fetchedAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model CronLog {
+  id          String   @id @default(cuid())
+  executedAt  DateTime @default(now())
+  queriesRun  Int
+  papersFound Int
+  alertsSent  Int
+  errors      String?  @db.Text
+  status      String
+}
