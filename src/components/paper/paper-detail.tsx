@@ -5,9 +5,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { PaperSummary } from '@/types/paper'
 
-// These will be created in later tasks
-// import { AiSummary } from './ai-summary'
-// import { TranslationView } from './translation-view'
+import { AiSummary } from './ai-summary'
+import { TranslationView } from './translation-view'
 // import { ReferencesSection } from './references-section'
 
 type View = 'original' | 'translation' | 'summary'
@@ -103,17 +102,15 @@ export function PaperDetail({ arxivId, paper, htmlContent }: PaperDetailProps) {
       )}
 
       {view === 'translation' && (
-        <div className="bg-green-50 rounded-lg p-6">
-          <p className="text-gray-600 mb-4">Translation coming soon.</p>
-          <p className="text-sm text-gray-500">This feature will be available once the AI module is implemented.</p>
-        </div>
+        <TranslationView
+          arxivId={arxivId}
+          htmlContent={htmlContent}
+          abstract={paper.abstract}
+        />
       )}
 
       {view === 'summary' && (
-        <div className="bg-blue-50 rounded-lg p-6">
-          <p className="text-gray-600 mb-4">AI Summary coming soon.</p>
-          <p className="text-sm text-gray-500">This feature will be available once the AI module is implemented.</p>
-        </div>
+        <AiSummary arxivId={arxivId} />
       )}
     </div>
   )
