@@ -7,7 +7,7 @@ import type { PaperSummary } from '@/types/paper'
 
 import { AiSummary } from './ai-summary'
 import { TranslationView } from './translation-view'
-// import { ReferencesSection } from './references-section'
+import { ReferencesSection } from './references-section'
 
 type View = 'original' | 'translation' | 'summary'
 
@@ -112,6 +112,8 @@ export function PaperDetail({ arxivId, paper, htmlContent }: PaperDetailProps) {
       {view === 'summary' && (
         <AiSummary arxivId={arxivId} />
       )}
+
+      <ReferencesSection arxivId={arxivId} htmlContent={htmlContent} />
     </div>
   )
 }
