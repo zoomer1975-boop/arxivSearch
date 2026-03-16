@@ -4,18 +4,24 @@ import { prisma } from '@/lib/prisma'
 import { CategorySelector } from '@/components/mypage/category-selector'
 import { KeywordManager } from '@/components/mypage/keyword-manager'
 import { AlertSettings } from '@/components/mypage/alert-settings'
+import { WatchedPapersList } from '@/components/mypage/watched-papers-list'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default async function MyPage() {
   const session = await auth()
   if (!session) redirect('/login')
 
-  const [categories, keywords, settings] = await Promise.all([
+  const [categories, keywords, settings, watchedPapers] = await Promise.all([
     prisma.userCategory.findMany({ where: { userId: session.user.id } }),
     prisma.userKeyword.findMany({ where: { userId: session.user.id } }),
     prisma.user.findUnique({
       where: { id: session.user.id },
       select: { alertMethod: true, telegramChatId: true, alertTime: true },
+    }),
+    prisma.watchedPaper.findMany({
+      where: { userId: session.user.id },
+      orderBy: { notifiedAt: 'desc' },
+      take: 50,
     }),
   ])
 
@@ -68,7 +74,13 @@ export default async function MyPage() {
         </TabsContent>
 
         <TabsContent value="papers">
-          <p className="text-gray-500 text-sm">Watched papers will appear here. (Implemented in Task 12)</p>
+          <WatchedPapersList
+            papers={watchedPapers.map(p => ({
+              ...p,
+              matchedKeywords: JSON.parse(p.matchedKeywords) as string[],
+              notifiedAt: p.notifiedAt.toISOString(),
+            }))}
+          />
         </TabsContent>
       </Tabs>
     </div>
