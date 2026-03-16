@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { translateToKorean } from '@/lib/claude-api'
+import { translateToKorean } from '@/lib/ai-api'
 import { auth } from '@/lib/auth'
 
 export async function GET(
@@ -37,7 +37,7 @@ export async function GET(
   } catch (error) {
     console.error('Translation error:', error)
     return NextResponse.json(
-      { error: 'Failed to translate. Check ANTHROPIC_API_KEY.' },
+      { error: 'Failed to translate. Check AI_API_KEY and AI_PROVIDER settings.' },
       { status: 500 }
     )
   }
