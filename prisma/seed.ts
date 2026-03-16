@@ -12,7 +12,8 @@ const adapter = new PrismaPg({ connectionString })
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
-  const hashedPassword = await bcrypt.hash('Admin@1234', 12)
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? 'Admin@1234'
+  const hashedPassword = await bcrypt.hash(adminPassword, 12)
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@arxiv-search.com' },
@@ -30,5 +31,8 @@ async function main() {
 }
 
 main()
-  .catch(console.error)
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
   .finally(() => prisma.$disconnect())

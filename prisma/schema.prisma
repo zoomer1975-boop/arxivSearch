@@ -24,6 +24,12 @@ enum AlertMethod {
   BOTH
 }
 
+enum CronStatus {
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
 model User {
   id             String      @id @default(cuid())
   name           String
@@ -98,5 +104,5 @@ model CronLog {
   papersFound Int
   alertsSent  Int
   errors      String?  @db.Text
-  status      String
+  status      CronStatus
 }
